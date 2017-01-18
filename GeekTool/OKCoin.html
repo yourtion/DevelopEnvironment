@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+</head>
+<body style="color:#CCC; background:rgba(0, 0, 0, 0.1);">
+  <div>BTC：<span id="btc"></span></div>
+  <div>LTC：<span id="ltc"></span></div>
+</body>
+<script>
+  var wsServer = 'wss://real.okcoin.cn:10440/websocket/okcoinapi';
+  var websocket = new WebSocket(wsServer);
+  websocket.onopen = function (evt) { onOpen(evt) };
+  websocket.onmessage = function (evt) { onMessage(evt) };
+  var btc = document.getElementById("btc");
+  var ltc = document.getElementById("ltc");
+  var last_btc, last_ltc;
+  function onOpen(evt) {
+    websocket.send("{'event':'addChannel','channel':'ok_sub_spotcny_btc_ticker'}");
+    websocket.send("{'event':'addChannel','channel':'ok_sub_spotcny_ltc_ticker'}");
+  }
+  function onMessage(evt) {
+    var data = JSON.parse(evt.data)[0];
+    var channel = data.channel;
+    var value = data.data.last;
+    if (channel === 'ok_sub_spotcny_btc_ticker') {
+      btc.innerHTML = value;
+      if (value < last_btc) {
+        btc.style.color = "Red";
+      } else {
+        btc.style.color = "Green";
+      }
+      last_btc = value;
+    }
+    if (channel === 'ok_sub_spotcny_ltc_ticker') {
+      if (value < last_ltc) {
+        ltc.style.color = "Red";
+      } else {
+        ltc.style.color = "Green";
+      }
+      ltc.innerHTML = value;
+      last_ltc = value;
+    }
+  }
+</script>
+</html>
